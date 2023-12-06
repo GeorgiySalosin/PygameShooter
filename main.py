@@ -1,4 +1,5 @@
 from pygame import *
+from utility import *
 from animation import *
 from static_object import *
 
@@ -19,12 +20,12 @@ virtual_surface = Surface((WIDTH, HEIGHT))  # this surface represents a display.
 background = image.load(f'Content/Map/Overcast/Overcast_HQ.jpg')
 background = transform.scale(background,[background.get_width()//4, background.get_height()//4])
 
-dx = -(background.get_width()//2) + screen.get_width()//2
-dy = -(background.get_height()//2) + screen.get_height()//2
-clock = time.Clock()
+dx = -(background.get_width()//2) + virtual_surface.get_width()//2
+dy = -(background.get_height()//2) + virtual_surface.get_height()//2
 pos = [0, 0]
 
 # USER DATA
+clock = time.Clock()
 FPS = 60
 font = font.Font('Content/HUD/Fonts/Bernhard.otf', 40)
 camNoScopeSensibility = 1.5
@@ -40,55 +41,32 @@ previous_state = current_state
 
 bullets = BULLETS
 is_mouse_locked = True
+mouse.set_visible(False)
 event.set_grab(True)
-def lock_mouse(gx, gy, check_pos_offset = False):   #enables limitless move with mouse (hides a cursor itself)
-    mouse.set_visible(False)
-    px = screen.get_width()//2
-    py = screen.get_height()//2
-    mouse_pos = (px, py)
-    rel = mouse.get_rel()
-    gx += rel[0]
-    gy += rel[1]
-    if mouse.get_pos()[0] < mouse_pos[0] - 100 \
-            or mouse.get_pos()[0] > mouse_pos[0] + 100 \
-            or mouse.get_pos()[1] < mouse_pos[1] - 100 \
-            or mouse.get_pos()[1] > mouse_pos[1] + 100:     # if set mouse pos to 0 every frame then mouse move will be flicky, that's why magic numbers are used
-        mouse.set_pos([px, py])
-        if check_pos_offset:    #if snapping to locked mouse mode (F1 pressed) then we have to compensate mouse position offset
-            gx -= rel[0]
-            gy -= rel[1]
-    return gx, gy
-def play_cycled(anim_list, current_frame):  #utility function for playing animation by switching frames in an animation list
-    virtual_surface.blit(anim_list[current_frame], (0, 0))
-    current_frame += 1
-    if current_frame >= len(anim_list):
-        current_frame = 0
-    return current_frame
-
-def use_animation(current_state, current_frame):    # defines which animation should be played based on current state
-
-    if current_state == states[0]:
-        current_frame = play_cycled(a_idle_m24, current_frame)
-    elif current_state == states[1]:
-        current_frame = play_cycled(a_zooming_m24, current_frame)
-    elif current_state == states[2]:
-        current_frame = play_cycled(a_scope_idle_m24, current_frame)
-    elif current_state == states[3]:
-        current_frame = play_cycled(a_scope_shot_m24, current_frame)
-    elif current_state == states[4]:
-        current_frame = play_cycled(a_noscope_shot_m24, current_frame)
-    elif current_state == states[5]:
-        current_frame = play_cycled(a_reloading_bullet_m24, current_frame)
-    elif current_state == states[6]:
-        current_frame = play_cycled(a_reloading_mag_m24, current_frame)
-    elif current_state == states[7]:
-        current_frame = play_cycled(a_blend_exposure_m24, current_frame)
-    return current_state, current_frame
 
 # STATIC OBJECTS
-solid = resize(tree01a, 10)
-solid2 = resize(tree01a, 100)
+#solid = resize_by_distance(tree01a, 100)
+#solid2 = resize_by_distance(tree01a, 10)
 
+def play_m24_anim(current_state, current_frame):    # defines which animation should be played based on current state
+
+    if current_state == states[0]:
+        current_frame = play_cycled(a_idle_m24, current_frame, virtual_surface)
+    elif current_state == states[1]:
+        current_frame = play_cycled(a_zooming_m24, current_frame, virtual_surface)
+    elif current_state == states[2]:
+        current_frame = play_cycled(a_scope_idle_m24, current_frame, virtual_surface)
+    elif current_state == states[3]:
+        current_frame = play_cycled(a_scope_shot_m24, current_frame, virtual_surface)
+    elif current_state == states[4]:
+        current_frame = play_cycled(a_noscope_shot_m24, current_frame, virtual_surface)
+    elif current_state == states[5]:
+        current_frame = play_cycled(a_reloading_bullet_m24, current_frame, virtual_surface)
+    elif current_state == states[6]:
+        current_frame = play_cycled(a_reloading_mag_m24, current_frame, virtual_surface)
+    elif current_state == states[7]:
+        current_frame = play_cycled(a_blend_exposure_m24, current_frame, virtual_surface)
+    return current_state, current_frame
 
 run = True
 while run:
@@ -104,8 +82,9 @@ while run:
                 run = False
             elif e.key == K_F1:
                 is_mouse_locked = not is_mouse_locked
+                mouse.set_visible(not mouse.get_visible())
                 if is_mouse_locked:
-                    dx, dy = lock_mouse(dx, dy, True)
+                    dx, dy = lock_mouse(dx, dy, virtual_surface, camNoScopeSensibility, True)
             elif e.key == K_F11:  # to go fullscreen or back
                 is_fullscreen = not is_fullscreen
                 if is_fullscreen:
@@ -164,13 +143,9 @@ while run:
 
         elif e.type == MOUSEMOTION:
             if is_mouse_locked:
-                dx, dy = lock_mouse(dx, dy)
+                dx, dy = lock_mouse(dx, dy, virtual_surface, camNoScopeSensibility)
             else:
                 event.set_grab(False)
-
-
-        if mouse.get_focused():
-            ...
 
     if current_state == states[1]:
         automatic_zoom = True
@@ -251,20 +226,14 @@ while run:
             else:
                 current_state = states[5]
 
-    if dx > 0:  # Prevent scrolling out of background bounds
-        dx = 0
-    elif dx < -(background.get_width()-screen.get_width()):
-        dx = -(background.get_width()-screen.get_width())
-    if dy > 0:
-        dy = 0
-    elif dy < -(background.get_height()-screen.get_height()):
-        dy = -(background.get_height()-screen.get_height())
+    dx, dy = bg_check_bounds(dx, dy, background, virtual_surface)
 
     virtual_surface.blit(background, [dx, dy])
-    current_state, current_frame = use_animation(current_state, current_frame)
+    current_state, current_frame = play_m24_anim(current_state, current_frame)
+
+
     scaled_surface = transform.scale(virtual_surface, current_size)
     screen.blit(scaled_surface, (0, 0))
-
     display.flip()
     clock.tick(FPS)
 quit()

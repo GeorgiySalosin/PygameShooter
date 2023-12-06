@@ -1,33 +1,8 @@
-import atlas
+from utility import *
 from pygame import *
 
 
-def anim_list(image, tile_res, length, scale=1):
-    myList = []
-    for i in range(0, length):
-        myList.append(atlas.get_frame_nonsquare(image, tile_res, i, scale))
-    return myList
 
-
-def anim_list_reverse(image, tile_res, length, scale=1):
-    myList = []
-    for i in range(0, length):
-        myList.append(atlas.get_frame_nonsquare(image, tile_res, length-i, scale))
-    return myList
-
-
-def anim_list_nonsquare(image, tile_w, tile_h, length, scale=1):
-    myList = []
-    for i in range(0, length):
-        myList.append(atlas.get_frame_nonsquare(image, tile_w, tile_h, i, scale))
-    return myList
-
-
-def anim_list_nonsquare_reverse(image, tile_w, tile_h, length, scale=1):
-    myList = []
-    for i in range(0, length):
-        myList.append(atlas.get_frame_nonsquare(image, tile_w, tile_h, length-i, scale))
-    return myList
 
 
 i_test = image.load(r"test/order_test.png")
