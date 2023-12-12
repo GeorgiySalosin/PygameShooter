@@ -1,4 +1,25 @@
 from pygame import *
+from configparser import ConfigParser
+
+def cfg_load():
+    config_path = 'config.ini'
+    config = ConfigParser()
+
+    try:
+        with open(config_path) as f:
+            config.read_file(f)
+    except FileNotFoundError:
+        config['SETTINGS'] = {
+            "screen_width": str(display.Info().current_w),
+            "screen_height": str(display.Info().current_h),
+            "bullets": '5',
+            "camNoScopeSensibility": '2'
+        }
+        with open(config_path, 'w') as f:
+            config.write(f)
+    return config
+config = cfg_load()
+
 
 # ATLASSING
 def get_frame(input_image, tile_res, frame, scale=1):
@@ -6,13 +27,13 @@ def get_frame(input_image, tile_res, frame, scale=1):
     atlas_res = int(input_image.get_width() / tile_res)
     image.blit(input_image, (0, 0),
                ((tile_res * (frame % atlas_res)), (tile_res * (frame // atlas_res)), tile_res, tile_res))
-    image = transform.scale(image, ((tile_res * scale), (tile_res * scale)))
+    image = transform.scale(image, (round(int(config['SETTINGS']['screen_width']) * scale), round(int(config['SETTINGS']['screen_height']) * scale)))
     return image
 def get_frame_nonsquare(input_image, tile_w, tile_h, frame, scale=1):
     image = Surface((tile_w, tile_h), SRCALPHA)
     atlas_res = input_image.get_width() / tile_w
     image.blit(input_image, (0, 0), (tile_w * (frame % atlas_res), (tile_h * (frame // atlas_res)), tile_w, tile_h))
-    image = transform.scale(image, ((tile_w * scale), (tile_h * scale)))
+    image = transform.scale(image, (round(int(config['SETTINGS']['screen_width']) * scale), round(int(config['SETTINGS']['screen_height']) * scale)))
     return image
 
 
@@ -21,7 +42,7 @@ def get_frame_nonsquare(input_image, tile_w, tile_h, frame, scale=1):
 def anim_list(image, tile_res, length, scale=1):
     myList = []
     for i in range(0, length):
-        myList.append(get_frame_nonsquare(image, tile_res, i, scale))
+        myList.append(get_frame(image, tile_res, i, scale))
     return myList
 def anim_list_reverse(image, tile_res, length, scale=1):
     myList = []
@@ -40,8 +61,8 @@ def anim_list_nonsquare_reverse(image, tile_w, tile_h, length, scale=1):
         myList.append(get_frame_nonsquare(image, tile_w, tile_h, length-i, scale))
     return myList
 
-def play_cycled(anim_list, current_frame, virtual_surface):  #utility function for playing animation by switching frames in an animation list
-    virtual_surface.blit(anim_list[current_frame], (0, 0))
+def play_cycled(anim_list, current_frame, virtual_surface, coords = (0, 0)):  #utility function for playing animation by switching frames in an animation list
+    virtual_surface.blit(anim_list[current_frame], (coords[0], coords[1]))
     current_frame += 1
     if current_frame >= len(anim_list):
         current_frame = 0
@@ -67,8 +88,10 @@ def resize_by_distance(surface, range):
     return surface
 
 
+# FUNCTIONAL
 
-#FUNCTIONAL
+
+
 def bg_check_bounds(dx, dy, background, virtual_surface):    # Prevent scrolling out of background bounds
     if dx > 0:
         dx = 0
@@ -79,6 +102,7 @@ def bg_check_bounds(dx, dy, background, virtual_surface):    # Prevent scrolling
     elif dy < -(background.get_height()-virtual_surface.get_height()):
         dy = -(background.get_height()-virtual_surface.get_height())
     return dx, dy
+
 
 def lock_mouse(gx, gy, virtual_surface, camNoScopeSensibility, check_pos_offset = False):   #enables limitless move with mouse
     px = virtual_surface.get_width()//2
@@ -98,4 +122,25 @@ def lock_mouse(gx, gy, virtual_surface, camNoScopeSensibility, check_pos_offset 
     return gx, gy
 
 
+def bullet(virtual_surface, tracer_anim, is_tracer_start):
+    tracer_frame = 0
+    while tracer_frame < 255:
+        tracer_frame = play_cycled(tracer_anim, tracer_frame, virtual_surface,
+                                   [(virtual_surface.get_width() -
+                                     tracer_anim[0].get_width()) // 2, (
+                                            virtual_surface.get_height() - tracer_anim[
+                                        0].get_height()) // 2])
 
+
+def zoom(bg, dx, dy):
+    bg = transform.scale(bg, [bg.get_width()*4, bg.get_height()* 4])
+    dx *=4
+    dy*=4
+    return bg, dx, dy
+
+
+def unzoom(bg, dx, dy):
+    bg = transform.scale(bg, [bg.get_width() // 4, bg.get_height() // 4])
+    dx //= 4
+    dy //= 4
+    return bg, dx, dy
