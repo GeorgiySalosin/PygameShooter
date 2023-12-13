@@ -2,7 +2,6 @@ from utility import *
 from pygame import *
 
  # order and switch debug
-test = (image.load(r"test/order_test.png"), 1920, 1080, 144, 0.9)
 
 
 a_idle_m24 = anim_list_nonsquare(image.load(r"Content/Character/Weapon/M24/Idle.png"), 1920, 1080, 144, 0.9)

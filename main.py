@@ -1,4 +1,3 @@
-from configparser import ConfigParser
 from pygame import *
 init()
 from utility import *
@@ -16,9 +15,9 @@ current_size = screen.get_size()
 last_size = current_size  # screen size before going fullscreen
 virtual_surface = Surface((WIDTH*9//10, HEIGHT*9//10))  # this surface represents a display. can be scaled to blit onto it
 
-background = image.load(f'Content/Map/Overcast/Overcast_HQ.jpg')
-background = transform.scale(background,[background.get_width()//4, background.get_height()//4])
-
+background_zoomed = image.load(f'Content/Map/Overcast/Overcast_HQ.jpg')
+background = transform.scale(background_zoomed,[background_zoomed.get_width()//3, background_zoomed.get_height()//3])
+current_background = background
 dx = -(background.get_width()//2) + virtual_surface.get_width()//2
 dy = -(background.get_height()//2) + virtual_surface.get_height()//2
 pos = [0, 0]
@@ -30,8 +29,8 @@ font = font.Font('Content/HUD/Fonts/Bernhard.otf', 40)
 camNoScopeSensibility = float(config['SETTINGS']['camnoscopesensibility'])
 BULLETS = 5
 automatic_zoom = True
-is_zoomed = False
-
+scale_level = 1
+previous_scale_level = scale_level
 states = ('Idle', 'Zooming', 'Scope_idle', 'Scope_shot', 'Noscope_shot', 'Reloading_bullet', 'Reloading_mag', 'Blend_exposure')
 states_duration = (2400, 350, 0, 250, 300, 970, 4166, 250)
 rifle_frame = 0
@@ -47,8 +46,7 @@ event.set_grab(True)
 is_tracer_start = False
 bullet_List = []
 # STATIC OBJECTS
-solid = resize_by_distance(tree01a, 100)
-#solid2 = resize_by_distance(tree01a, 10)
+
 
 def play_m24_anim(current_state, rifle_frame):    # defines which animation should be played based on current state
     global dx, dy       # if shot animation is played we also change background coordinates
@@ -61,7 +59,7 @@ def play_m24_anim(current_state, rifle_frame):    # defines which animation shou
     elif current_state == states[3]:
 
         rifle_frame = play_cycled(a_scope_shot_m24, rifle_frame, virtual_surface)
-        '''if rifle_frame<len(a_scope_shot_recoil_m24):
+        '''if rifle_frame<len(a_scope_shot_recoil_m24):     # Transform BG to simulate recoil 
             dx += a_scope_shot_recoil_m24[rifle_frame][0]
             dy += a_scope_shot_recoil_m24[rifle_frame][1]'''
     elif current_state == states[4]:
@@ -161,7 +159,7 @@ while run:
 
     if current_state == states[1]:
         automatic_zoom = True
-
+        scale_level = 4
         if (time.get_ticks() - previous_time) > states_duration[1]:
             previous_state = current_state
             current_state = states[2]
@@ -205,6 +203,7 @@ while run:
                 current_state = states[5]
 
     elif current_state == states[5]:
+        scale_level = 1
         if (time.get_ticks() - previous_time) > states_duration[5]:
             previous_state = current_state
             previous_time = time.get_ticks()
@@ -215,6 +214,7 @@ while run:
                 current_state = states[0]
 
     elif current_state == states[6]:
+        scale_level = 1
         if (time.get_ticks() - previous_time) > states_duration[6]:
             previous_state = current_state
             previous_time = time.get_ticks()
@@ -240,16 +240,18 @@ while run:
                 current_state = states[5]
 
     dx, dy = bg_check_bounds(dx, dy, background, virtual_surface)
-
+    if previous_scale_level < scale_level:
+        background,dx,dy=zoom(background,dx,dy)
+        previous_scale_level = scale_level
+    elif previous_scale_level > scale_level:
+        background,dx,dy = unzoom(background,dx,dy)
+        previous_scale_level = scale_level
     virtual_surface.blit(background, [dx, dy])
     #if is_tracer_start:
         #bullet(virtual_surface, a_fx_tracer_base, is_tracer_start)
        # is_tracer_start = False
 
     current_state, rifle_frame = play_m24_anim(current_state, rifle_frame)
-
-
-    background.blit(solid, [367, 235])
 
     scaled_surface = transform.scale(virtual_surface, current_size)
     screen.blit(scaled_surface, (0, 0))

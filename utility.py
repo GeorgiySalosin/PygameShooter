@@ -27,7 +27,6 @@ def get_frame(input_image, tile_res, frame, scale=1):
     atlas_res = int(input_image.get_width() / tile_res)
     image.blit(input_image, (0, 0),
                ((tile_res * (frame % atlas_res)), (tile_res * (frame // atlas_res)), tile_res, tile_res))
-    image = transform.scale(image, (round(int(config['SETTINGS']['screen_width']) * scale), round(int(config['SETTINGS']['screen_height']) * scale)))
     return image
 def get_frame_nonsquare(input_image, tile_w, tile_h, frame, scale=1):
     image = Surface((tile_w, tile_h), SRCALPHA)
@@ -83,15 +82,12 @@ def foggize(surface, fog_amount):
 def resize_by_distance(surface, range):
     width, height = surface.get_size()
     surface = transform.scale(surface, (int(width*10/range), int(height*10/range)))
-    fog_amount = int(range/100)
+    fog_amount = float(range/400)
     surface = foggize(surface, fog_amount)
     return surface
 
 
 # FUNCTIONAL
-
-
-
 def bg_check_bounds(dx, dy, background, virtual_surface):    # Prevent scrolling out of background bounds
     if dx > 0:
         dx = 0
@@ -109,8 +105,8 @@ def lock_mouse(gx, gy, virtual_surface, camNoScopeSensibility, check_pos_offset 
     py = virtual_surface.get_height()//2
     mouse_pos = (px, py)
     rel = mouse.get_rel()
-    gx += rel[0]*camNoScopeSensibility
-    gy += rel[1]*camNoScopeSensibility
+    gx -= rel[0]*camNoScopeSensibility
+    gy -= rel[1]*camNoScopeSensibility
     if mouse.get_pos()[0] < mouse_pos[0] - 100 \
             or mouse.get_pos()[0] > mouse_pos[0] + 100 \
             or mouse.get_pos()[1] < mouse_pos[1] - 100 \
@@ -122,7 +118,7 @@ def lock_mouse(gx, gy, virtual_surface, camNoScopeSensibility, check_pos_offset 
     return gx, gy
 
 
-def bullet(virtual_surface, tracer_anim, is_tracer_start):
+def bullet(virtual_surface, tracer_anim, tracer_frame):
     tracer_frame = 0
     while tracer_frame < 255:
         tracer_frame = play_cycled(tracer_anim, tracer_frame, virtual_surface,

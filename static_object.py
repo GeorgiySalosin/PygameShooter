@@ -1,106 +1,88 @@
 from pygame import *
 from utility import *
-
-class SM:
-    def __init__(self, dist, scale):
+class SM_Tree:
+    def __init__(self, dist, res, frame, coords=(0,0), scale=1):
+        self.image = image.load('Content/Map/Overcast/Vegetation_Overcast.png')
         self.dist = dist
         self.scale = scale
+        self.surface = get_frame(self.image, res,frame,scale)
+        self.coords = coords
 
-class Bush(SM):
-
-    def __init__(self, dist, scale):
-        super().__init__(dist, scale)
-        self.img = image.load('Content/Map/Overcast/Vegetation_Overcast.png')
+class SM_Building:
+    def __init__(self, dist, res, frame, coords=(0,0), scale=1):
+        self.image = image.load('Content/Map/Overcast/Buildings_Overcast.png')
         self.dist = dist
         self.scale = scale
+        self.surface = get_frame(self.image, res,frame,scale)
+        self.coords = coords
 
 
+tree01a_001 = SM_Tree(100, 512, 2, (0,0))
+tree01b_001 = SM_Tree(100, 512, 3, (0,0))
+tree02a_001 = SM_Tree(100, 512, 6, (0,0))
+tree02b_001 = SM_Tree(100, 512, 7, (0,0))
+tree03a_001 = SM_Tree(100, 512, 10, (0,0))
+tree03b_001 = SM_Tree(100, 512, 11, (0,0))
+tree04a_001 = SM_Tree(100, 512, 12, (0,0))
+tree04b_001 = SM_Tree(100, 512, 13, (0,0))
+tree05a_001 = SM_Tree(100, 512, 14, (0,0))
+tree05b_001 = SM_Tree(100, 512, 15, (0,0))
+bush01a_001 = SM_Tree(100, 256, 0, (0,0))
+bush01b_001 = SM_Tree(100, 256, 1, (0,0))
+bush02a_001 = SM_Tree(100, 256, 8, (0,0))
+bush02b_001 = SM_Tree(100, 256, 9, (0,0))
+bush03a_001 = SM_Tree(100, 256, 16, (0,0))
+bush03b_001 = SM_Tree(100, 256, 17, (0,0))
+bush04a_001 = SM_Tree(100, 256, 24, (0,0))
+bush04b_001 = SM_Tree(100, 256, 25, (0,0))
+bush05a_001 = SM_Tree(100, 256, 34, (0,0))
+bush05b_001 = SM_Tree(100, 256, 35, (0,0))
+bush06a_001 = SM_Tree(100, 256, 40, (0,0))
+bush06b_001 = SM_Tree(100, 256, 41, (0,0))
 
-imageVegetation = image.load('Content/Map/Overcast/Vegetation_Overcast.png')
-imageVegetation_col = image.load('Content/Map/Overcast/Vegetation_Overcast_Col.jpg')
-imageBuildings = image.load('Content/Map/Overcast/Buildings_Overcast.png')
-imageBuildings_col = image.load('Content/Map/Overcast/Buildings_Overcast_Col.jpg')
+grass01 = SM_Tree(100, 256, 2, (0,0))
+grass02 = SM_Tree(100, 256, 10, (0,0))
+grass03 = SM_Tree(100, 256, 18, (0,0))
+grass04 = SM_Tree(100, 256, 26, (0,0))
+grass05 = SM_Tree(100, 256, 27, (0,0))
+grass06 = SM_Tree(100, 256, 34, (0,0))
+grass07 = SM_Tree(100, 256, 35, (0,0))
+grass08 = SM_Tree(100, 256, 42, (0,0))
+grass09 = SM_Tree(100, 256, 43, (0,0))
 
-tree01a = get_frame(imageVegetation, 512,2,1)
-tree01b = get_frame(imageVegetation, 512, 3, 1)
-tree02a = get_frame(imageVegetation, 512, 6, 1)
-tree02b = get_frame(imageVegetation, 512, 7, 1)
-tree03a = get_frame(imageVegetation, 512, 10, 1)
-tree03b = get_frame(imageVegetation, 512, 11, 1)
-tree04a = get_frame(imageVegetation, 512, 12, 1)
-tree04b = get_frame(imageVegetation, 512, 13, 1)
-tree05a = get_frame(imageVegetation, 512, 14, 1)
-tree05b = get_frame(imageVegetation, 512, 15, 1)
-bush01a = get_frame(imageVegetation, 256, 0, 1)
-bush01b = get_frame(imageVegetation, 256, 1, 1)
-bush02a = get_frame(imageVegetation, 256, 8, 1)
-bush02b = get_frame(imageVegetation, 256, 9, 1)
-bush03a = get_frame(imageVegetation, 256, 16, 1)
-bush03b = get_frame(imageVegetation, 256, 17, 1)
-bush04a = get_frame(imageVegetation, 256, 24, 1)
-bush04b = get_frame(imageVegetation, 256, 25, 1)
-bush05a = get_frame(imageVegetation, 256, 34, 1)
-bush05b = get_frame(imageVegetation, 256, 35, 1)
-bush06a = get_frame(imageVegetation, 256, 40, 1)
-bush06b = get_frame(imageVegetation, 256, 41, 1)
-
-grass01 = get_frame(imageVegetation, 256, 2, 1)
-grass02 = get_frame(imageVegetation, 256, 10, 1)
-grass03 = get_frame(imageVegetation, 256, 18, 1)
-grass04 = get_frame(imageVegetation, 256, 26, 1)
-grass05 = get_frame(imageVegetation, 256, 27, 1)
-grass06 = get_frame(imageVegetation, 256, 34, 1)
-grass07 = get_frame(imageVegetation, 256, 35, 1)
-grass08 = get_frame(imageVegetation, 256, 42, 1)
-grass09 = get_frame(imageVegetation, 256, 43, 1)
-
-building_destroyed01a = get_frame(imageBuildings, 512,0,1)
-building_destroyed01a_col = get_frame(imageBuildings_col, 512,0)
-building_destroyed01b = get_frame(imageBuildings, 512,1,1)
-building_destroyed02a = get_frame(imageBuildings, 512,2,1)
-building_destroyed02b = get_frame(imageBuildings, 512,3,1)
-building_destroyed03a = get_frame(imageBuildings, 512,4,1)
-building_destroyed03b = get_frame(imageBuildings, 512,5,1)
-building_destroyed03c = get_frame(imageBuildings, 512,6,1)
-building_residential01a = get_frame(imageBuildings, 512,7,1)
-building_residential01b = get_frame(imageBuildings, 512,8,1)
-building_residential01c = get_frame(imageBuildings, 512,9,1)
-building_residential02a = get_frame(imageBuildings, 512,10,1)
-building_residential02b = get_frame(imageBuildings, 512,11,1)
-building_residential02c = get_frame(imageBuildings, 512,12,1)
-building_residential03a = get_frame(imageBuildings, 512,13,1)
-building_residential03b = get_frame(imageBuildings, 512,14,1)
-building_residential03c = get_frame(imageBuildings, 512,15,1)
-building_residential04a = get_frame(imageBuildings, 512,16,1)
-building_residential04b = get_frame(imageBuildings, 512,17,1)
-building_residential04c = get_frame(imageBuildings, 512,18,1)
-building_residential05a = get_frame(imageBuildings, 512,19,1)
-building_residential05b = get_frame(imageBuildings, 512,20,1)
-building_residential05c = get_frame(imageBuildings, 512,21,1)
-building_residential06a = get_frame(imageBuildings, 512,22,1)
-building_residential06b = get_frame(imageBuildings, 512,23,1)
-building_residential07a = get_frame(imageBuildings, 512,24,1)
-building_residential07b = get_frame(imageBuildings, 512,25,1)
-building_residential08a = get_frame(imageBuildings, 512,26,1)
-building_residential08b = get_frame(imageBuildings, 512,27,1)
-building_toilet_a = get_frame(imageBuildings, 512,28,1)
-building_toilet_b = get_frame(imageBuildings, 512,29,1)
-fence_trash_small = get_frame(imageBuildings, 512,30,1)
-fence_rod = get_frame(imageBuildings, 512,31,1)
-fence_concrete = get_frame(imageBuildings, 512,32,1)
-fence_fabric = get_frame(imageBuildings, 512,33,1)
-fence_trash_large_a = get_frame(imageBuildings, 512,34,1)
-fence_trash_large_b = get_frame(imageBuildings, 512,35,1)
-
-
-class SM:
-    def __init__(self, texture, distance, location):
-        self.set(texture, distance, location)
-
-    def set(self, texture, distance, location):
-        self.texture = texture
-        self.distance = distance
-        self.location = location
-
-
-tree01_inst001 = SM(tree01a, 100, [200, 200])
+destroyed01a_001 = SM_Building(100, 512,0,(0,0))
+destroyed01b_001 = SM_Building(100, 512,1,(0,0))
+destroyed02a_001 = SM_Building(100, 512,2,(0,0))
+destroyed02b_001 = SM_Building(100, 512,3,(0,0))
+destroyed03a_001 = SM_Building(100, 512,4,(0,0))
+destroyed03b_001 = SM_Building(100, 512,5,(0,0))
+destroyed03c_001 = SM_Building(100, 512,6,(0,0))
+residential01a_001 = SM_Building(100, 512,7,(0,0))
+residential01b_001 = SM_Building(100, 512,8,(0,0))
+residential01c_001 = SM_Building(100, 512,9,(0,0))
+residential02a_001 = SM_Building(100, 512,10,(0,0))
+residential02b_001 = SM_Building(100, 512,11,(0,0))
+residential02c_001 = SM_Building(100, 512,12,(0,0))
+residential03a_001 = SM_Building(100, 512,13,(0,0))
+residential03b_001 = SM_Building(100, 512,14,(0,0))
+residential03c_001 = SM_Building(100, 512,15,(0,0))
+residential04a_001 = SM_Building(100, 512,16,(0,0))
+residential04b_001 = SM_Building(100, 512,17,(0,0))
+residential04c_001 = SM_Building(100, 512,18,(0,0))
+residential05a_001 = SM_Building(100, 512,19,(0,0))
+residential05b_001 = SM_Building(100, 512,20,(0,0))
+residential05c_001 = SM_Building(100, 512,21,(0,0))
+residential06a_001 = SM_Building(100, 512,22,(0,0))
+residential06b_001 = SM_Building(100, 512,23,(0,0))
+residential07a_001 = SM_Building(100, 512,24,(0,0))
+residential07b_001 = SM_Building(100, 512,25,(0,0))
+residential08a_001 = SM_Building(100, 512,26,(0,0))
+residential08b_001 = SM_Building(100, 512,27,(0,0))
+toilet_a_0011 = SM_Building(100, 512,28,(0,0))
+toilet_b_001 = SM_Building(100, 512,29,(0,0))
+fence_trash_small_001 = SM_Building(100, 512,30,(0,0))
+fence_rod_001 = SM_Building(100, 512,31,(0,0))
+fence_concrete_001 = SM_Building(100, 512,32,(0,0))
+fence_fabric_001 = SM_Building(100, 512,33,(0,0))
+fence_trash_large_a_001 = SM_Building(100, 512,34,(0,0))
+fence_trash_large_b_001 = SM_Building(100, 512,35,(0,0))
