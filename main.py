@@ -6,7 +6,7 @@ from static_object import *
 
 
 # SCREEN DATA
-FULLSCREEN_SIZE = (int(config['SETTINGS']["screen_width"]), int(config['SETTINGS']["screen_height"]))
+
 is_fullscreen = False
 WIDTH = FULLSCREEN_SIZE[0]
 HEIGHT = int(WIDTH * 9 / 16)
@@ -14,23 +14,23 @@ screen = display.set_mode((WIDTH*9//10, HEIGHT*9//10), RESIZABLE)
 current_size = screen.get_size()
 last_size = current_size  # screen size before going fullscreen
 virtual_surface = Surface((WIDTH*9//10, HEIGHT*9//10))  # this surface represents a display. can be scaled to blit onto it
-
+scale_level = 4
 background_zoomed = image.load(f'Content/Map/Overcast/Overcast_HQ.jpg')
-background = transform.scale(background_zoomed,[background_zoomed.get_width()//3, background_zoomed.get_height()//3])
+background = transform.scale(background_zoomed,[background_zoomed.get_width()//scale_level, background_zoomed.get_height()//scale_level])
 current_background = background
 dx = -(background.get_width()//2) + virtual_surface.get_width()//2
 dy = -(background.get_height()//2) + virtual_surface.get_height()//2
+
 pos = [0, 0]
 
 # USER DATA
 clock = time.Clock()
 FPS = 60
 font = font.Font('Content/HUD/Fonts/Bernhard.otf', 40)
-camNoScopeSensibility = float(config['SETTINGS']['camnoscopesensibility'])
-BULLETS = 5
+
+
 automatic_zoom = True
-scale_level = 1
-previous_scale_level = scale_level
+
 states = ('Idle', 'Zooming', 'Scope_idle', 'Scope_shot', 'Noscope_shot', 'Reloading_bullet', 'Reloading_mag', 'Blend_exposure')
 states_duration = (2400, 350, 0, 250, 300, 970, 4166, 250)
 rifle_frame = 0
@@ -41,13 +41,16 @@ previous_state = current_state
 
 bullets = BULLETS
 is_mouse_locked = True
+is_zoomed = False
 mouse.set_visible(False)
 event.set_grab(True)
 is_tracer_start = False
-bullet_List = []
+list_bullets = []
 # STATIC OBJECTS
-
-
+prev_dx = dx
+prev_dy = dy
+prev_dx_zoomed = 0
+prev_dy_zoomed = 0
 def play_m24_anim(current_state, rifle_frame):    # defines which animation should be played based on current state
     global dx, dy       # if shot animation is played we also change background coordinates
     if current_state == states[0]:
@@ -107,7 +110,34 @@ while run:
                         rifle_frame = 0
         # MOUSE BUTTON CLICK
         elif e.type == MOUSEBUTTONDOWN:
-            if e.button == 3:   #to scope-in/out
+            if e.button == 1:   # to shoot
+                if current_state == states[2]:
+                    previous_state = current_state
+                    previous_time = time.get_ticks()
+                    current_state = states[3]
+                    rifle_frame = 0
+                    bullets -= 1
+                    list_bullets.append(Bullet(a_fx_tracer_bright, a_fx_tracer_bright_zoomed, 0, 200, [
+                        (virtual_surface.get_width() - a_fx_tracer_bright[0].get_width()) // 2,
+                        (virtual_surface.get_height() - a_fx_tracer_bright[0].get_height()) // 2], [
+                                                   (virtual_surface.get_width() - a_fx_tracer_bright_zoomed[
+                                                       0].get_width()) // 2,
+                                                   (virtual_surface.get_height() - a_fx_tracer_bright_zoomed[
+                                                       0].get_height()) // 2]))
+                if current_state == states[0]:
+                    previous_state = current_state
+                    previous_time = time.get_ticks()
+                    current_state = states[4]
+                    rifle_frame = 0
+                    bullets -= 1
+                    list_bullets.append(Bullet(a_fx_tracer_bright, a_fx_tracer_bright_zoomed, 0, 200, [
+                        (virtual_surface.get_width() - a_fx_tracer_bright[0].get_width()) // 2,
+                        (virtual_surface.get_height() - a_fx_tracer_bright[0].get_height()) // 2], [
+                                                   (virtual_surface.get_width() - a_fx_tracer_bright_zoomed[
+                                                       0].get_width()) // 2,
+                                                   (virtual_surface.get_height() - a_fx_tracer_bright_zoomed[
+                                                       0].get_height()) // 2]))
+            elif e.button == 3:   #to scope-in/out
                 if current_state == states[0]:
                     previous_state = current_state
                     previous_time = time.get_ticks()
@@ -122,44 +152,35 @@ while run:
                     is_zoomed = False
 
                 elif current_state == states[2]:
-                    previous_state = current_state
-                    current_state = states[0]
-                    rifle_frame = 0
-                    is_zoomed = True
+                    if not mouse.get_pressed()[0]:
+                        previous_state = current_state
+                        current_state = states[0]
+                        rifle_frame = 0
+                        is_zoomed = True
 
                 elif current_state == states[3]:
-                    previous_state = current_state
-                    current_state = states[0]
-                    rifle_frame = 0
-                    is_zoomed = True
+                    if not mouse.get_pressed()[0]:
+                        previous_state = current_state
+                        current_state = states[0]
+                        rifle_frame = 0
+                        is_zoomed = True
 
                 elif current_state == states[5] or current_state == states[6]:
                     automatic_zoom = not automatic_zoom
-            if e.button == 1:   # to shoot
-                if current_state == states[2]:
-                    previous_state = current_state
-                    previous_time = time.get_ticks()
-                    current_state = states[3]
-                    rifle_frame = 0
-                    bullets -= 1
 
-                if current_state == states[0]:
-                    previous_state = current_state
-                    previous_time = time.get_ticks()
-                    current_state = states[4]
-                    rifle_frame = 0
-                    bullets -= 1
-                if current_state == states[3] or current_state == states[4]:
-                    is_tracer_start = True
         elif e.type == MOUSEMOTION:
             if is_mouse_locked:
-                dx, dy = lock_mouse(dx, dy, virtual_surface, camNoScopeSensibility)
+                if is_zoomed:
+                    dx, dy = lock_mouse(dx, dy, virtual_surface, camLensSensibility)
+                else:
+                    dx, dy = lock_mouse(dx, dy, virtual_surface, camNoScopeSensibility)
             else:
                 event.set_grab(False)
-
-    if current_state == states[1]:
+    if current_state == states[0]:
+        is_zoomed = False
+    elif current_state == states[1]:
         automatic_zoom = True
-        scale_level = 4
+        is_zoomed = True
         if (time.get_ticks() - previous_time) > states_duration[1]:
             previous_state = current_state
             current_state = states[2]
@@ -203,7 +224,7 @@ while run:
                 current_state = states[5]
 
     elif current_state == states[5]:
-        scale_level = 1
+        is_zoomed = False
         if (time.get_ticks() - previous_time) > states_duration[5]:
             previous_state = current_state
             previous_time = time.get_ticks()
@@ -214,7 +235,7 @@ while run:
                 current_state = states[0]
 
     elif current_state == states[6]:
-        scale_level = 1
+        is_zoomed = False
         if (time.get_ticks() - previous_time) > states_duration[6]:
             previous_state = current_state
             previous_time = time.get_ticks()
@@ -239,20 +260,39 @@ while run:
             else:
                 current_state = states[5]
 
-    dx, dy = bg_check_bounds(dx, dy, background, virtual_surface)
-    if previous_scale_level < scale_level:
-        background,dx,dy=zoom(background,dx,dy)
-        previous_scale_level = scale_level
-    elif previous_scale_level > scale_level:
-        background,dx,dy = unzoom(background,dx,dy)
-        previous_scale_level = scale_level
-    virtual_surface.blit(background, [dx, dy])
-    #if is_tracer_start:
-        #bullet(virtual_surface, a_fx_tracer_base, is_tracer_start)
-       # is_tracer_start = False
+    dx_zoomed = round((dx-virtual_surface.get_width()//2)*scale_level+virtual_surface.get_width()//2)
+    dy_zoomed = round((dy-virtual_surface.get_height()//2)*scale_level+virtual_surface.get_height()//2)
+
+    if is_zoomed:
+        dx_zoomed, dy_zoomed = bg_check_bounds(dx_zoomed, dy_zoomed, background_zoomed, virtual_surface)
+        virtual_surface.blit(background_zoomed, [dx_zoomed, dy_zoomed])
+        for index, bul in enumerate(list_bullets):
+            if bul.frame >= len(bul.a_list) - 1:
+                list_bullets.pop(index)
+            virtual_surface.blit(bul.a_list_zoomed[bul.frame], bul.coords_zoomed)
+            bul.coords_zoomed[0] += dx_zoomed - prev_dx_zoomed
+            bul.coords_zoomed[1] += dy_zoomed - prev_dy_zoomed
+            bul.coords[0] += dx - prev_dx
+            bul.coords[1] += dy - prev_dy
+            bul.frame += 1
+    else:
+        dx, dy = bg_check_bounds(dx, dy, background, virtual_surface)
+        virtual_surface.blit(background, [dx, dy])
+        for index, bul in enumerate(list_bullets):
+            if bul.frame >= len(bul.a_list) - 1:
+                list_bullets.pop(index)
+            virtual_surface.blit(bul.a_list[bul.frame], bul.coords)
+            bul.coords_zoomed[0] += dx_zoomed - prev_dx_zoomed
+            bul.coords_zoomed[1] += dy_zoomed - prev_dy_zoomed
+            bul.coords[0] += dx - prev_dx
+            bul.coords[1] += dy - prev_dy
+            bul.frame += 1
 
     current_state, rifle_frame = play_m24_anim(current_state, rifle_frame)
-
+    prev_dx_zoomed = dx_zoomed
+    prev_dy_zoomed = dy_zoomed
+    prev_dx = dx
+    prev_dy = dy
     scaled_surface = transform.scale(virtual_surface, current_size)
     screen.blit(scaled_surface, (0, 0))
     display.flip()

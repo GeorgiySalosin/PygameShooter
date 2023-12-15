@@ -13,14 +13,19 @@ def cfg_load():
             "screen_width": str(display.Info().current_w),
             "screen_height": str(display.Info().current_h),
             "bullets": '5',
-            "camNoScopeSensibility": '2'
+            "camnoscopesensibility": '2',
+            "camlenssensibility": '0.5'
+
         }
         with open(config_path, 'w') as f:
             config.write(f)
     return config
 config = cfg_load()
-
-
+# CONSTANTS:
+FULLSCREEN_SIZE = (int(config['SETTINGS']["screen_width"]), int(config['SETTINGS']["screen_height"]))
+BULLETS = int(config['SETTINGS']['bullets'])
+camNoScopeSensibility = float(config['SETTINGS']['camnoscopesensibility'])
+camLensSensibility = float(config['SETTINGS']['camlenssensibility'])
 # ATLASSING
 def get_frame(input_image, tile_res, frame, scale=1):
     image = Surface((tile_res, tile_res), SRCALPHA)
@@ -140,3 +145,14 @@ def unzoom(bg, dx, dy):
     dx //= 4
     dy //= 4
     return bg, dx, dy
+
+class Bullet:
+    def __init__(self, a_list, a_list_zoomed, frame, speed, coords, coords_zoomed):
+        self.a_list = a_list
+        self.a_list_zoomed = a_list_zoomed
+        self.speed = speed
+        self.frame = frame
+        self.distance = 0
+        self.coords = coords
+        self.coords_zoomed = coords_zoomed
+

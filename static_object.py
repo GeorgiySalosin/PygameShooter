@@ -50,7 +50,7 @@ grass07 = SM_Tree(100, 256, 35, (0,0))
 grass08 = SM_Tree(100, 256, 42, (0,0))
 grass09 = SM_Tree(100, 256, 43, (0,0))
 
-destroyed01a_001 = SM_Building(100, 512,0,(0,0))
+destroyed01a_001 = SM_Building(100, 512,0,(300,400))
 destroyed01b_001 = SM_Building(100, 512,1,(0,0))
 destroyed02a_001 = SM_Building(100, 512,2,(0,0))
 destroyed02b_001 = SM_Building(100, 512,3,(0,0))

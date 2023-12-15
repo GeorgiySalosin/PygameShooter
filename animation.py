@@ -18,5 +18,7 @@ a_scope_shot_recoil_m24 = [[0, -10], [1, -34], [3, -65], [5, -96], [7, -120], [9
                            [30, -71], [29, -63], [28, -56], [27, -49], [26, -42], [24, -36], [22, -26], [21, -23],
                            [20, -21], [20, -20]]
 
-i_fx_tracer_base = image.load(r'Content/FX/Tracer_Base_256x16.png')
-a_fx_tracer_base = anim_list(i_fx_tracer_base, 256, 256, 0.9)
+i_traser_bright = image.load(r'Content/FX/Tracer_Base_256x16.png')
+a_fx_tracer_bright = anim_list(image.load(r'Content/FX/Tracer_Base_256x16.png'), 256, 256, 0.9)
+i_traser_bright = transform.scale_by(i_traser_bright,4)
+a_fx_tracer_bright_zoomed = anim_list(i_traser_bright, 1024, 256, 0.9)
