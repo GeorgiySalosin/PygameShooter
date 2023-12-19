@@ -1,21 +1,27 @@
 from pygame import *
 from utility import *
-class SM_Tree:
+class SM_Tree(sprite.Sprite):
     def __init__(self, dist, res, frame, coords=(0,0), scale=1):
+        sprite.Sprite.__init__(self)
         self.image = image.load('Content/Map/Overcast/Vegetation_Overcast.png')
         self.dist = dist
         self.scale = scale
         self.surface = get_frame(self.image, res,frame,scale)
         self.coords = coords
-
-class SM_Building:
+        self.rect = self.surface.get_rect()
+        self.rect.topleft = coords
+        self.collision = mask.from_surface(self.surface)
+class SM_Building(sprite.Sprite):
     def __init__(self, dist, res, frame, coords=(0,0), scale=1):
+        sprite.Sprite.__init__(self)
         self.image = image.load('Content/Map/Overcast/Buildings_Overcast.png')
         self.dist = dist
         self.scale = scale
-        self.surface = get_frame(self.image, res,frame,scale)
+        self.surface = (get_frame(self.image, res,frame,scale))
+        self.surface = resize_by_distance(self.surface, dist)
         self.coords = coords
-
+        self.rect = self.surface.get_rect()
+        self.collision = mask.from_surface(self.surface)
 
 tree01a_001 = SM_Tree(100, 512, 2, (0,0))
 tree01b_001 = SM_Tree(100, 512, 3, (0,0))
@@ -50,14 +56,8 @@ grass07 = SM_Tree(100, 256, 35, (0,0))
 grass08 = SM_Tree(100, 256, 42, (0,0))
 grass09 = SM_Tree(100, 256, 43, (0,0))
 
-destroyed01a_001 = SM_Building(100, 512,0,(300,400))
-destroyed01b_001 = SM_Building(100, 512,1,(0,0))
-destroyed02a_001 = SM_Building(100, 512,2,(0,0))
-destroyed02b_001 = SM_Building(100, 512,3,(0,0))
-destroyed03a_001 = SM_Building(100, 512,4,(0,0))
-destroyed03b_001 = SM_Building(100, 512,5,(0,0))
-destroyed03c_001 = SM_Building(100, 512,6,(0,0))
-residential01a_001 = SM_Building(100, 512,7,(0,0))
+
+residential01a_001 = SM_Building(10, 512,7,(0,0))
 residential01b_001 = SM_Building(100, 512,8,(0,0))
 residential01c_001 = SM_Building(100, 512,9,(0,0))
 residential02a_001 = SM_Building(100, 512,10,(0,0))

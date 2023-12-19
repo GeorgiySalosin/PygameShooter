@@ -145,9 +145,10 @@ def unzoom(bg, dx, dy):
     dx //= 4
     dy //= 4
     return bg, dx, dy
-
-class Bullet:
+print('module "utilities" loaded successfully')
+class Bullet(sprite.Sprite):
     def __init__(self, a_list, a_list_zoomed, frame, speed, coords, coords_zoomed):
+        sprite.Sprite.__init__(self)
         self.a_list = a_list
         self.a_list_zoomed = a_list_zoomed
         self.speed = speed
@@ -155,4 +156,10 @@ class Bullet:
         self.distance = 0
         self.coords = coords
         self.coords_zoomed = coords_zoomed
+        self.m_list = a_list
+        for i in self.m_list:
+            i = mask.from_surface(i)
+        self.m_list_zoomed = a_list_zoomed
+        for i in self.m_list_zoomed:
+            i = mask.from_surface(i)
 

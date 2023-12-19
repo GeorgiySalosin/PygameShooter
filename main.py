@@ -1,6 +1,8 @@
 from pygame import *
 init()
+print('importing utilities...')
 from utility import *
+print('importing animation...')
 from animation import *
 from static_object import *
 
@@ -158,13 +160,6 @@ while run:
                         rifle_frame = 0
                         is_zoomed = True
 
-                elif current_state == states[3]:
-                    if not mouse.get_pressed()[0]:
-                        previous_state = current_state
-                        current_state = states[0]
-                        rifle_frame = 0
-                        is_zoomed = True
-
                 elif current_state == states[5] or current_state == states[6]:
                     automatic_zoom = not automatic_zoom
 
@@ -269,7 +264,7 @@ while run:
         for index, bul in enumerate(list_bullets):
             if bul.frame >= len(bul.a_list) - 1:
                 list_bullets.pop(index)
-            virtual_surface.blit(bul.a_list_zoomed[bul.frame], bul.coords_zoomed)
+            virtual_surface.blit(bul.m_list_zoomed[bul.frame], bul.coords_zoomed)
             bul.coords_zoomed[0] += dx_zoomed - prev_dx_zoomed
             bul.coords_zoomed[1] += dy_zoomed - prev_dy_zoomed
             bul.coords[0] += dx - prev_dx
@@ -281,7 +276,7 @@ while run:
         for index, bul in enumerate(list_bullets):
             if bul.frame >= len(bul.a_list) - 1:
                 list_bullets.pop(index)
-            virtual_surface.blit(bul.a_list[bul.frame], bul.coords)
+            virtual_surface.blit(bul.m_list[bul.frame], bul.coords)
             bul.coords_zoomed[0] += dx_zoomed - prev_dx_zoomed
             bul.coords_zoomed[1] += dy_zoomed - prev_dy_zoomed
             bul.coords[0] += dx - prev_dx
